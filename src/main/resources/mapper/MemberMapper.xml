@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.dao.MemberDao">
+    <resultMap id="BaseResultMap" type="com.example.domain.MemberDto">
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="sex" property="sex"/>
+        <result column="desc" property="desc"/>
+        <result column="createTime" property="createTime"/>
+        <result column="modifyTime" property="modifyTime"/>
+    </resultMap>
+
+    <parameterMap id="MemberDto" type="com.example.domain.MemberDto"/>
+
+    <sql id="Base_Column_List">
+		id, username, password, sex , 'desc' , createTime , modifyTime
+	</sql>
+
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from member
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from member
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterMap="MemberDto" useGeneratedKeys="true" keyProperty="id">
+
+		INSERT INTO
+		member(id,username,password,sex,`desc`,createTime,modifyTime)
+		VALUES
+		(#{id},#{username},#{password},#{sex},#{desc},now(),now())
+	</insert>
+
+    <insert id="insertList" parameterType="java.util.List">
+
+        <selectKey resultType="java.lang.Integer" keyProperty="id"
+                   order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO member(id,username,password,sex,`desc`,createTime,modifyTime)
+        VALUES
+        <foreach collection="items" index="index" item="item" separator=",">
+            (
+            #{item.id},#{item.username},#{item.password},
+            #{item.sex},#{item.desc},now(),now()
+            )
+        </foreach>
+
+    </insert>
+
+    <update id="update" parameterMap="MemberDto">
+        UPDATE member
+        SET
+        modifyTime = now()
+        <if test="username!=null">
+            ,username = #{username}
+        </if>
+        <if test="password!=null">
+            ,password = #{password}
+        </if>
+        <if test="sex!=null">
+            ,sex = #{sex}
+        </if>
+        <if test="desc!=null">
+            ,`desc` = #{desc}
+        </if>
+        WHERE id = #{id}
+
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+		delete from
+		member
+		where
+		id = #{id}
+	</delete>
+
+</mapper>
